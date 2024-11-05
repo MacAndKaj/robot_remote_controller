@@ -7,7 +7,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -O3")
 
 find_package(Boost 1.86 COMPONENTS date_time log log_setup program_options system)
 
-
 set(SOURCE_FILES 
     src/logging.hpp
 
