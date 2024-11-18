@@ -1,9 +1,7 @@
-#ifndef PS5DUALSENSESTATE_HPP_
-#define PS5DUALSENSESTATE_HPP_
+#ifndef RRC_PS5_CTRL_STATE_HPP_
+#define RRC_PS5_CTRL_STATE_HPP_
 
-#include <cstdint>
-
-struct Ps5DualsenseState
+struct GamepadState
 {
     int l_x;
     int l_y;
@@ -20,9 +18,9 @@ struct Ps5DualsenseState
     bool triangle;
     bool circle;
     bool cross;
-    bool square;          ;
-    bool options;          ;
-    bool share;          ;
+    bool square;
+    bool options;
+    bool share;
 };
 
-#endif // PS5DUALSENSESTATE_HPP_
+#endif // RRC_PS5_CTRL_STATE_HPP_

@@ -19,7 +19,7 @@ public:
     NetworkDeviceFinder(unsigned short port);
     virtual ~NetworkDeviceFinder();
 
-    std::unique_ptr<DeviceConnection> getDeviceConnection();
+    EndpointInfo getConnectionInfo();
 
 private:
     void work(std::promise<EndpointInfo> p);

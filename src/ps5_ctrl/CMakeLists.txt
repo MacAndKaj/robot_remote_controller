@@ -1,10 +1,12 @@
-set(LIBRARY_NAME ps5_ctrl)
+set(LIBRARY_NAME rrc_ps5_ctrl)
 
 set(SOURCE_FILES 
     defs.hpp
+    GamepadMonitoring.hpp
+    GamepadState.hpp
     Ps5DualsenseHidAgent.hpp
-    Ps5DualsenseState.hpp
 
+    GamepadMonitoring.cpp
     Ps5DualsenseHidAgent.cpp
 )
 

@@ -1,15 +1,19 @@
 #ifndef CONNECTION_DEVICECONNECTION_HPP_
 #define CONNECTION_DEVICECONNECTION_HPP_
 
+#include <connection/IDeviceConnection.hpp>
+
 #include <boost/asio.hpp>
 
 namespace connection
 {
 
-class DeviceConnection
+class DeviceConnection : public IDeviceConnection
 {
 public:
     DeviceConnection(const std::string &address, unsigned short port);
+    virtual ~DeviceConnection();
+    bool send(const Indication & msg) override;
 
 private:
     boost::asio::io_context m_io_context;

@@ -1,5 +1,7 @@
-#include "Ps5DualsenseHidAgent.hpp"
-#include "defs.hpp"
+#include <ps5_ctrl/Ps5DualsenseHidAgent.hpp>
+#include <ps5_ctrl/defs.hpp>
+
+#include <logging.hpp>
 
 #include <cstring>
 #include <cerrno>
@@ -12,7 +14,7 @@
 
 #define MASK_BIT(x) (1 << x)
 
-namespace ps5_ctrl
+namespace rrc::ps5_ctrl
 {
 
 Ps5DualsenseHidAgent::Ps5DualsenseHidAgent(const std::filesystem::path &device_path)
@@ -33,7 +35,7 @@ Ps5DualsenseHidAgent::Ps5DualsenseHidAgent(const std::filesystem::path &device_p
         throw std::runtime_error("Error while reading raw name");
     }
 
-    std::cout << "Raw name: " << raw_name_buf << std::endl;
+    BOOST_LOG_TRIVIAL(info) << "[Ps5DualsenseHidAgent] Raw name: " << raw_name_buf;
 
     verifyDevice();
 }
@@ -41,17 +43,11 @@ Ps5DualsenseHidAgent::Ps5DualsenseHidAgent(const std::filesystem::path &device_p
 Ps5DualsenseHidAgent::~Ps5DualsenseHidAgent()
 {
     ::close(m_fd);
-    std::cout << "Closed PS5 dualsense descriptor" << std::endl;    
+    BOOST_LOG_TRIVIAL(info) << "[~Ps5DualsenseHidAgent] Closed PS5 dualsense descriptor";
 }
 
-Ps5DualsenseState Ps5DualsenseHidAgent::readState() const
-{ 
-    // struct hidraw_report_descriptor rd;
-    // rpt_desc.size = desc_size;
-    // if (ioctl(m_fd, HIDIOCGRDESC, &rd) < 0)
-    // {
-    //     throw std::runtime_error("Error while reading descriptor report");
-    // }
+GamepadState Ps5DualsenseHidAgent::readState() const
+{
     std::vector<unsigned char> buffer(m_s_report_size);
     
     int bytesRead = read(m_fd, buffer.data(), buffer.size());
@@ -60,7 +56,7 @@ Ps5DualsenseState Ps5DualsenseHidAgent::readState() const
         throw std::runtime_error("Incorrect size of bytes read");
     }
 
-    Ps5DualsenseState tmp;
+    GamepadState tmp;
     std::memset(&tmp, 0, sizeof(tmp));
  
     auto state_base = buffer.cbegin();
@@ -99,10 +95,15 @@ void Ps5DualsenseHidAgent::verifyDevice()
     }
 
     // todo: verification
-    std::cout << "Bus type: " << info.bustype << std::endl;
-    std::cout << "Vendor ID: 0x" << std::hex << info.vendor << std::endl;
-    std::cout << "Product ID: 0x" << std::hex << info.product << std::endl;
-    std::cout << std::dec;
+    BOOST_LOG_TRIVIAL(info) << "[Ps5DualsenseHidAgent::verifyDevice] Bus type: " << info.bustype;
+    BOOST_LOG_TRIVIAL(info) << "[Ps5DualsenseHidAgent::verifyDevice] Vendor ID: 0x" << std::hex << info.vendor;
+    BOOST_LOG_TRIVIAL(info) << "[Ps5DualsenseHidAgent::verifyDevice] Product ID: 0x" << std::hex << info.product;
+
+    if (info.vendor != PS5_DUALSENSE_VID or info.product != PS5_DUALSENSE_PID)
+    {
+        BOOST_LOG_TRIVIAL(error) << "[Ps5DualsenseHidAgent::verifyDevice] Provided device is not PS5 Dualsense controller";
+        throw std::runtime_error("Error when verifying HID device");
+    }
 }
 
-} // namespace ps5_ctrl
+} // namespace rrc::ps5_ctrl

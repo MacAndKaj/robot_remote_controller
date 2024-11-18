@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.18)
 
-project(ps5_reader)
+project(robot_remote_controller)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -O3")
 
-find_package(Boost 1.86 COMPONENTS date_time log log_setup program_options system)
+find_package(Boost 1.86 COMPONENTS date_time json log log_setup program_options system)
 
 set(SOURCE_FILES 
     src/logging.hpp
@@ -23,7 +23,6 @@ target_include_directories(${PROJECT_NAME}
 )
 
 target_link_libraries(${PROJECT_NAME} 
-    ${Boost_LIBRARIES} 
-    connection
-    ps5_ctrl
+    ${Boost_LIBRARIES}
+    rrc_init
 )

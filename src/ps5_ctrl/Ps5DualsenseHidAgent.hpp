@@ -1,21 +1,21 @@
 #ifndef PS5DUALSENSEHIDAGENT_HPP_
 #define PS5DUALSENSEHIDAGENT_HPP_
 
+#include <ps5_ctrl/IGamepadAgent.hpp>
+#include <ps5_ctrl/GamepadState.hpp>
+
 #include <filesystem>
 
-#include "Ps5DualsenseState.hpp"
-
-namespace ps5_ctrl
+namespace rrc::ps5_ctrl
 {
 
-class Ps5DualsenseHidAgent
+class Ps5DualsenseHidAgent : public IGamepadAgent
 {
 public:
     Ps5DualsenseHidAgent(const std::filesystem::path &device_path);
     virtual ~Ps5DualsenseHidAgent();
 
-    Ps5DualsenseState readState() const;
-    
+    GamepadState readState() const;
 
 private:
     void verifyDevice();
@@ -24,6 +24,6 @@ private:
     static constexpr int m_s_report_size{64};
 };
 
-} // namespace ps5_ctrl
+} // namespace rrc::ps5_ctrl
 
 #endif // PS5DUALSENSEHIDAGENT_HPP_

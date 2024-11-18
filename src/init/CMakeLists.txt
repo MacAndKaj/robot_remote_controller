@@ -1,12 +1,11 @@
-set(LIBRARY_NAME rrc_connection)
+set(LIBRARY_NAME rrc_init)
 
 set(SOURCE_FILES 
-    DeviceConnection.hpp
-    Messages.hpp
-    NetworkDeviceFinder.hpp
+    ApplicationContext.hpp
+    RrcApp.hpp
 
-    DeviceConnection.cpp
-    NetworkDeviceFinder.cpp
+    ApplicationContext.cpp
+    RrcApp.cpp
 )
 
 add_library(${LIBRARY_NAME} ${SOURCE_FILES})
@@ -18,4 +17,6 @@ target_include_directories(${LIBRARY_NAME}
 
 target_link_libraries(${LIBRARY_NAME} 
     ${Boost_LIBRARIES}
+    rrc_connection
+    rrc_ps5_ctrl
 )

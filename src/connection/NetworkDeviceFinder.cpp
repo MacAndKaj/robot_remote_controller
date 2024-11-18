@@ -1,5 +1,7 @@
 #include <connection/NetworkDeviceFinder.hpp>
 
+#include <logging.hpp>
+
 #include <iostream>
 #include <thread>
 
@@ -32,15 +34,16 @@ NetworkDeviceFinder::NetworkDeviceFinder(unsigned short port)
 {
     m_socket.open(boost::asio::ip::udp::v4());
     m_socket.bind(m_endpoint);
+    BOOST_LOG_TRIVIAL(info) << "[NetworkDeviceFinder] Connected to: " << m_endpoint;
 }
 
 NetworkDeviceFinder::~NetworkDeviceFinder()
 {
-    std::cout << __func__ << ": Closing connection" << std::endl;
+    BOOST_LOG_TRIVIAL(info) << "[~NetworkDeviceFinder] Closing connection";
     m_socket.close();
 }
 
-std::unique_ptr<DeviceConnection> NetworkDeviceFinder::getDeviceConnection()
+EndpointInfo NetworkDeviceFinder::getConnectionInfo()
 {
     using namespace std::chrono_literals;
     std::promise<EndpointInfo> device_address;
@@ -51,7 +54,7 @@ std::unique_ptr<DeviceConnection> NetworkDeviceFinder::getDeviceConnection()
     std::future_status status;
     do
     {
-        std::cout << "Waiting for device address..." << std::endl;
+        BOOST_LOG_TRIVIAL(info) << "[NetworkDeviceFinder::getDeviceConnection] Waiting for device address...";
         status = device_address_future.wait_for(10s);
     }
     while (status == std::future_status::timeout);
@@ -63,12 +66,10 @@ std::unique_ptr<DeviceConnection> NetworkDeviceFinder::getDeviceConnection()
 
     if (status != std::future_status::ready)
     {
-        return nullptr;
+        return {"", 0};
     }
 
-    auto [address, port] = device_address_future.get();
-
-    return std::make_unique<DeviceConnection>(address, port);
+    return device_address_future.get();
 }
 
 void NetworkDeviceFinder::work(std::promise<EndpointInfo> p)
@@ -87,17 +88,17 @@ void NetworkDeviceFinder::work(std::promise<EndpointInfo> p)
         }
         catch (std::exception &e)
         {
-            std::cerr << __func__ << "(): Received std::exception: " << e.what() << std::endl;
+            BOOST_LOG_TRIVIAL(error) << "[NetworkDeviceFinder::work] Received std::exception: " << e.what();
         }
         catch (...)
         {
-            std::cerr << __func__ << ": Unknown exception" << std::endl;   
+            BOOST_LOG_TRIVIAL(error) << "[NetworkDeviceFinder::work] Unknown exception";
         }
         output = parseMessageFromDevice(std::string(buffer.data(), bytes_received));
     }
     while (output.first.empty());
 
-    std::cout << __func__ << ": Received message: " << std::string(buffer.data(), bytes_received) << std::endl;
+    BOOST_LOG_TRIVIAL(error) << "[NetworkDeviceFinder::work] Received message: " << std::string(buffer.data(), bytes_received);
 
     p.set_value(std::move(output));
 }

@@ -1,18 +1,24 @@
-#include "logging.hpp"
-
-#include <ps5_ctrl/Ps5DualsenseHidAgent.hpp>
-#include <connection/NetworkDeviceFinder.hpp>
+#include <init/RrcApp.hpp>
+#include <logging.hpp>
+#include <program_options.hpp>
 
 #include <cstring>
-#include <iostream>
+#include <csignal>
+#include <memory>
 #include <unistd.h>
+
+std::shared_ptr<rrc::init::RrcApp> g_app;
 
 void sigquit_handler(int signal)
 {
+    if (g_app)
+    {
+        g_app->stop();
+        g_app.reset();
+    }
     exitLog();
     std::exit(0);
 }
-
 
 int main(int argc, char** argv)
 {
@@ -20,36 +26,22 @@ int main(int argc, char** argv)
 
     initLog();
 
-    BOOST_LOG_TRIVIAL(info) << "HEllo from reader, argc: " << argc;
+    g_app = std::make_shared<rrc::init::RrcApp>(argc, argv);
 
-    constexpr unsigned short default_broadcast_port{5162};
-
-    BOOST_LOG_TRIVIAL(info) << "Netowrk device finder start";
-    connection::NetworkDeviceFinder finder(default_broadcast_port);
-
-    BOOST_LOG_TRIVIAL(info) << "Starting device detection";
-    auto device_connection = finder.getDeviceConnection();
-
-    BOOST_LOG_TRIVIAL(info) << "Starting controller";
-    ps5_ctrl::Ps5DualsenseHidAgent controller_if{std::filesystem::path{argv[1]}};
-
-    int i = 10000;
-    auto previous_state = controller_if.readState();
-    while (i-->0)
+    if (g_app->logToStdout())
     {
-        auto state = controller_if.readState();
-
-        if (std::memcmp(&state, &previous_state,sizeof(previous_state)) != 0)
-        {
-            std::cout << "L_X: [" << state.l_x;
-            std::cout << "] L_Y: [" << state.l_y;
-            std::cout << "] R_X: [" << state.r_x;
-            std::cout << "] R_Y: [" << state.r_y;
-            std::cout << "]" << std::endl;
-        }
-        // sleep(1);
-        previous_state = state;
+        enableStdoutLogging();
     }
 
-    return EXIT_SUCCESS;
+    int status = g_app->run();
+
+    if (g_app)
+    {
+        g_app.reset();
+    }
+
+    // Tutaj jest akcja ze aplikacja jest nie do konca zniszczona i wylacza sie logger i juz chce wychodzic ale czeka na wszystko
+
+    exitLog();
+    return status;
 }

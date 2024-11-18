@@ -1,6 +1,9 @@
 #ifndef DEFS_HPP_
 #define DEFS_HPP_
 
+#define PS5_DUALSENSE_VID 0x054C
+#define PS5_DUALSENSE_PID 0x0CE6
+
 #define LX_OFFSET 1
 #define LY_OFFSET 2
 #define RX_OFFSET 3
